@@ -157,7 +157,6 @@ const orderProduct = async (req: Request, res: Response): Promise<void> => {
             stocked: stocked,
         });
     } catch (err) {
-        console.log(err);
         res.status(statusCodes.SERVER_ERROR).json({
             message: "Internal server Error",
         });
@@ -199,6 +198,7 @@ const stockProduct = async (req: Request, res: Response): Promise<void> => {
                 res.status(statusCodes.NOT_FOUND).json({
                     message: `Product ${product_id} does not exist in warehouse ${warehouse_id}`,
                 });
+                return;
             }
         }
         res.status(statusCodes.SERVER_ERROR).json({
@@ -241,6 +241,7 @@ const fulfillOrder = async (req: Request, res: Response): Promise<void> => {
             res.status(statusCodes.BAD_REQUEST).json({
                 message: "Not enough products in stock to fulfill order",
             });
+            return;
         }
         res.status(statusCodes.SERVER_ERROR).json({
             message: "Internal server Error",
