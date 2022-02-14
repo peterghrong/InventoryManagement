@@ -2,10 +2,20 @@ import { Prisma, Warehouse } from "@prisma/client";
 import { prisma } from "../server";
 
 export default class WarehouseService {
+    /**
+     *
+     * @returns All avaialable warehouses
+     */
     static async getAll() {
         const warehouses: Warehouse[] = await prisma.warehouse.findMany();
         return warehouses;
     }
+
+    /**
+     *
+     * @param id of warehouse
+     * @returns warehouse
+     */
     static async getWarehouse(id: number) {
         const warehouse: Warehouse | null = await prisma.warehouse.findFirst({
             where: {
@@ -15,6 +25,12 @@ export default class WarehouseService {
         return warehouse;
     }
 
+    /**
+     *
+     * @param name of warehouse
+     * @param address of warehouse
+     * @returns created warehouse
+     */
     static async createWarehouse(name: string, address: string) {
         const warehouse: Warehouse = await prisma.warehouse.create({
             data: {
@@ -25,6 +41,13 @@ export default class WarehouseService {
         return warehouse;
     }
 
+    /**
+     *
+     * @param id of warehouse
+     * @param name of warehouse
+     * @param address of warehouse
+     * @returns updated warehouse
+     */
     static async updateWarehouse(id: number, name: string, address: string) {
         const warehouse: Warehouse = await prisma.warehouse.update({
             where: { id: id },
@@ -36,6 +59,11 @@ export default class WarehouseService {
         return warehouse;
     }
 
+    /**
+     *
+     * @param id of warehouse
+     * @returns deleted warehouse
+     */
     static async deleteWarehouse(id: number) {
         await prisma.productInWarehouse.deleteMany({
             where: { warehouseId: id },
@@ -46,6 +74,11 @@ export default class WarehouseService {
         return warehouse;
     }
 
+    /**
+     *
+     * @param warehouseId of warehouse
+     * @returns all products in warehouse
+     */
     static async getProductsInWarehouse(warehouseId: number) {
         const productInWarehouse = await prisma.productInWarehouse.findMany({
             where: { warehouseId: warehouseId },
@@ -58,6 +91,12 @@ export default class WarehouseService {
         return productInWarehouse;
     }
 
+    /**
+     *
+     * @param productId
+     * @param warehouseId
+     * @returns foundOrCreated warehouse
+     */
     static async checkOrCreate(productId: number, warehouseId: number) {
         const productInWarehouse = await prisma.productInWarehouse.findUnique({
             where: {
@@ -87,6 +126,13 @@ export default class WarehouseService {
         return productInWarehouse;
     }
 
+    /**
+     *
+     * @param productId of product to order
+     * @param warehouseId of warehouse to order to
+     * @param quantity of product to order to warehouse
+     * @returns product detail in the warehouse
+     */
     static async orderProduct(
         productId: number,
         warehouseId: number,
@@ -111,6 +157,13 @@ export default class WarehouseService {
         return orderedProduct;
     }
 
+    /**
+     *
+     * @param productId of product
+     * @param warehouseId of warehouse
+     * @param quantity of product
+     * @returns product detail in the warehouse
+     */
     static async stockProducts(
         productId: number,
         warehouseId: number,
@@ -141,6 +194,13 @@ export default class WarehouseService {
         return stockedProduct;
     }
 
+    /**
+     *
+     * @param productId of product
+     * @param warehouseId of warehouse
+     * @param quantity of product
+     * @returns product detail in the warehouse
+     */
     static async fulfillOrder(
         productId: number,
         warehouseId: number,

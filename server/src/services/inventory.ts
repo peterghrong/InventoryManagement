@@ -1,12 +1,21 @@
-import { Prisma, Product, ProductInWarehouse, Warehouse } from "@prisma/client";
+import { Product } from "@prisma/client";
 import { prisma } from "../server";
 
 export default class InventoryService {
+    /**
+     *
+     * @returns All products in warehouse
+     */
     static async getAll() {
         const products: Product[] = await prisma.product.findMany();
         return products;
     }
 
+    /**
+     *
+     * @param id of product
+     * @returns product informations
+     */
     static async getProduct(id: number) {
         const product: Product | null = await prisma.product.findFirst({
             where: { id: id },
@@ -14,6 +23,12 @@ export default class InventoryService {
         return product;
     }
 
+    /**
+     *
+     * @param name of product
+     * @param description of product
+     * @returns product created
+     */
     static async createProduct(name: string, description: string) {
         const product: Product = await prisma.product.create({
             data: {
@@ -24,6 +39,13 @@ export default class InventoryService {
         return product;
     }
 
+    /**
+     *
+     * @param id of product
+     * @param name of product
+     * @param description of product
+     * @returns updated product
+     */
     static async updateProduct(id: number, name: string, description: string) {
         try {
             const product: Product = await prisma.product.update({
@@ -39,6 +61,11 @@ export default class InventoryService {
         }
     }
 
+    /**
+     *
+     * @param id of product
+     * @returns deleted product
+     */
     static async deleteProduct(id: number) {
         await prisma.productInWarehouse.deleteMany({
             where: { productId: id },
@@ -49,6 +76,11 @@ export default class InventoryService {
         return products;
     }
 
+    /**
+     *
+     * @param id of product
+     * @returns inventory detail of the product
+     */
     static async getProductDetail(id: number) {
         const productDetail = await prisma.productInWarehouse.findMany({
             where: { productId: id },
@@ -61,6 +93,10 @@ export default class InventoryService {
         return productDetail;
     }
 
+    /**
+     *
+     * @returns product details including [product id, name, description, in stock quantity, back ordered quantity]
+     */
     static async getProductSummary() {
         const productSummary = await prisma.productInWarehouse.groupBy({
             by: ["productId"],
