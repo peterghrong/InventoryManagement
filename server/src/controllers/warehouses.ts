@@ -38,7 +38,6 @@ const getProductsInWarehouse = async (
             products: products,
         });
     } catch (err) {
-        console.log(err);
         res.status(statusCodes.SERVER_ERROR).json({
             message: "Internal Server Error",
         });
