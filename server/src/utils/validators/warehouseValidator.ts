@@ -6,13 +6,16 @@ const warehouseValidator = () => {
         body("address").exists().isString(),
     ];
 };
+const warehouseIdValidator = () => {
+    return [param("id").exists().isInt()];
+};
 
 const orderValidator = () => {
     return [
-        param("product_id").exists(),
-        param("warehouse_id").exists(),
+        param("product_id").exists().isInt(),
+        param("warehouse_id").exists().isInt(),
         body("quantity").exists().isInt({ min: 0 }),
     ];
 };
 
-export { warehouseValidator, orderValidator };
+export { warehouseValidator, orderValidator, warehouseIdValidator };

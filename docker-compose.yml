@@ -11,15 +11,3 @@ services:
         ports:
             - "5432:5432"
         container_name: postgres_dev_db
-
-    test_db:
-        image: postgres
-        restart: always
-        environment:
-            - POSTGRES_USER=test
-            - POSTGRES_PASSWORD=test
-        volumes:
-            - /var/lib/postgresql/data
-        ports:
-            - "5433:5432"
-        container_name: postgres_test_db

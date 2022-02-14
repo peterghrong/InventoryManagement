@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, ButtonGroup, Form, Modal, Row, Table } from "react-bootstrap";
+import { Button, ButtonGroup, Form, Modal, Table } from "react-bootstrap";
 import {
     deleteProduct,
     getProductDetail,

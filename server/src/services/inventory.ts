@@ -40,10 +40,10 @@ export default class InventoryService {
     }
 
     static async deleteProduct(id: number) {
-        const relations = await prisma.productInWarehouse.deleteMany({
+        await prisma.productInWarehouse.deleteMany({
             where: { productId: id },
         });
-        const products = await prisma.product.deleteMany({
+        const products = await prisma.product.delete({
             where: { id: id },
         });
         return products;

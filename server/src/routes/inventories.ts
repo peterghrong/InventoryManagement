@@ -8,13 +8,13 @@ import {
     updateProduct,
 } from "../controllers/inventories";
 import {
-    inventoryValidator,
+    inventoryParamsValidator,
     productIdValidator,
 } from "../utils/validators/inventoryValidator";
 import { validate } from "../utils/validators/validate";
 
 /**
- * Define various routes for the items controller
+ * Define various routes for the Inventory controller
  */
 const inventoriesRouter = Router();
 
@@ -27,14 +27,13 @@ inventoriesRouter.get(
 );
 inventoriesRouter.post(
     "/products",
-    inventoryValidator(),
+    inventoryParamsValidator(),
     validate,
     createProduct
 );
-
 inventoriesRouter.put(
     "/products/:id",
-    inventoryValidator(),
+    inventoryParamsValidator().concat(productIdValidator()),
     validate,
     updateProduct
 );

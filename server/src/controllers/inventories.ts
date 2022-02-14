@@ -1,9 +1,7 @@
-import { Prisma, Product, Warehouse } from "@prisma/client";
-import { prisma } from "../server";
+import { Prisma, Product } from "@prisma/client";
 import { statusCodes } from "../utils/statusCodes";
 import { Request, Response } from "express";
 import InventoryService from "../services/inventory";
-import WarehouseService from "../services/warehouse";
 import { parseCSV } from "../utils/csvParser";
 
 /**
@@ -34,7 +32,6 @@ const getProductDetail = async (req: Request, res: Response): Promise<void> => {
         );
         res.status(statusCodes.SUCCESS).json({ productDetail: productDetail });
     } catch (err) {
-        console.log(err);
         res.status(statusCodes.SERVER_ERROR).json({
             message: "Internal Server Error",
         });
@@ -86,7 +83,7 @@ const updateProduct = async (req: Request, res: Response): Promise<void> => {
         if (err instanceof Prisma.PrismaClientKnownRequestError) {
             if (err.code === "P2025") {
                 res.status(statusCodes.NOT_FOUND).json({
-                    message: `Item with id: ${id} not found`,
+                    message: `Product with id: ${id} not found`,
                 });
                 return;
             }
@@ -107,11 +104,9 @@ const deleteProduct = async (req: Request, res: Response): Promise<void> => {
         params: { id },
     } = req;
     try {
-        const deletedProducts = await InventoryService.deleteProduct(
-            Number(id)
-        );
+        const deletedProduct = await InventoryService.deleteProduct(Number(id));
         res.status(statusCodes.SUCCESS).json({
-            deletedProducts,
+            product: deletedProduct,
         });
     } catch (err) {
         res.status(statusCodes.SERVER_ERROR).json({

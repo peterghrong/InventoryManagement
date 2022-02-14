@@ -67,7 +67,7 @@ describe("InventoryService tests", () => {
     });
 
     it("should get product detail", async () => {
-        const inventory = await prisma.warehouse.create({
+        await prisma.warehouse.create({
             data: {
                 name: "test",
                 address: "test",
@@ -98,12 +98,43 @@ describe("InventoryService tests", () => {
     it("should delete product", async () => {
         const deletedProduct = await InventoryService.deleteProduct(product.id);
         expect(deletedProduct).toMatchObject({
-            count: 1,
+            description: "test",
+            id: product.id,
+            name: "test",
         });
     });
 
+    it("should delete product and products in associated warehouse", async () => {
+        const warehouse = await prisma.warehouse.create({
+            data: {
+                name: "test",
+                address: "joe",
+                products: {
+                    create: [
+                        {
+                            inStockQuantity: 5,
+                            product: {
+                                connect: { id: product.id },
+                            },
+                        },
+                    ],
+                },
+            },
+        });
+        await InventoryService.deleteProduct(product.id);
+        const productInwarehouse = await prisma.productInWarehouse.findUnique({
+            where: {
+                productId_warehouseId: {
+                    productId: product.id,
+                    warehouseId: warehouse.id,
+                },
+            },
+        });
+        expect(productInwarehouse).toBeNull;
+    });
+
     it("should get product summary", async () => {
-        const inventory = await prisma.warehouse.create({
+        await prisma.warehouse.create({
             data: {
                 name: "test",
                 address: "test",
@@ -119,7 +150,7 @@ describe("InventoryService tests", () => {
                 },
             },
         });
-        const second = await prisma.warehouse.create({
+        await prisma.warehouse.create({
             data: {
                 name: "test",
                 address: "joe",
@@ -182,7 +213,7 @@ describe("/inventory/products api test", () => {
     });
 
     it("should get product detail", async () => {
-        const inventory = await prisma.warehouse.create({
+        await prisma.warehouse.create({
             data: {
                 name: "test",
                 address: "test",
@@ -248,109 +279,18 @@ describe("/inventory/products api test", () => {
         });
     });
 
-    // it("It should return error on post", async () => {
-    //     const missingAttrsResponse = await request(server)
-    //         .post("/inventory/products")
-    //         .send({
-    //             count: 1,
-    //         });
-    //     expect(missingAttrsResponse.status).toBe(400);
-    //     expect(missingAttrsResponse.body).toEqual({
-    //         errors: expect.objectContaining([
-    //             expect.objectContaining({
-    //                 msg: "Invalid value",
-    //                 param: "name",
-    //             }),
-    //         ]),
-    //     });
-    //     const rangeErrorResponse = await request(server)
-    //         .post("/inventory/items")
-    //         .send({
-    //             name: "range error",
-    //             description: "range error",
-    //             count: -1,
-    //         });
-    //     expect(rangeErrorResponse.status).toBe(400);
-    //     expect(rangeErrorResponse.body).toEqual({
-    //         errors: [
-    //             expect.objectContaining({
-    //                 msg: "Invalid value",
-    //                 param: "count",
-    //                 value: "-1",
-    //             }),
-    //         ],
-    //     });
-    // });
-
-    // it("should update items", async () => {
-    //     const response = await request(server)
-    //         .put(`/inventory/products/${item.id}`)
-    //         .send({
-    //             name: "update test",
-    //             description: "update test",
-    //             count: 2,
-    //         });
-    //     expect(response.status).toBe(200);
-    //     expect(response.body).toEqual({
-    //         item: expect.objectContaining({
-    //             id: item.id,
-    //             name: "update test",
-    //             description: "update test",
-    //             count: 2,
-    //         }),
-    //     });
-    // });
-
-    // it("should return errors on put", async () => {
-    //     const response = await request(server)
-    //         .put(`/inventory/products/${item.id}`)
-    //         .send({
-    //             name: "missing params",
-    //             description: "missing params",
-    //         });
-    //     expect(response.status).toBe(400);
-    //     expect(response.body).toEqual({
-    //         errors: expect.objectContaining([
-    //             expect.objectContaining({
-    //                 msg: "Invalid value",
-    //                 param: "count",
-    //             }),
-    //         ]),
-    //     });
-
-    //     const secondResponse = await request(server)
-    //         .put(`/inventory/${item.id + 1}`)
-    //         .send({
-    //             name: "invalid id",
-    //             description: "invalid id",
-    //             count: 1,
-    //         });
-    //     expect(secondResponse.status).toBe(401);
-    //     expect(secondResponse.body).toEqual({
-    //         message: `Item with id: ${item.id + 1} not found`,
-    //     });
-    // });
-
-    // it("should delete items", async () => {
-    //     const response = await request(server).delete(`/items/${item.id}`);
-    //     expect(response.status).toBe(200);
-    //     expect(response.body).toEqual({
-    //         item: expect.objectContaining({
-    //             id: item.id,
-    //             name: "test",
-    //             description: "test",
-    //             count: 1,
-    //         }),
-    //     });
-    // });
-
-    // it("should return error on delete", async () => {
-    //     const response = await request(server).delete(`/items/${item.id + 1}`);
-    //     expect(response.status).toBe(401);
-    //     expect(response.body).toEqual({
-    //         message: `Item with id: ${item.id + 1} not found`,
-    //     });
-    // });
+    it("should fail to update a product", async () => {
+        const response = await request(server)
+            .put(`/inventory/products/${product.id + 1}`)
+            .send({
+                name: "new test",
+                description: "new test",
+            });
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({
+            message: `Product with id: ${product.id + 1} not found`,
+        });
+    });
 
     it("should get blob data", async () => {
         const response = await request(server).get(
@@ -361,10 +301,3 @@ describe("/inventory/products api test", () => {
         expect(response.body).toBeInstanceOf(Buffer);
     });
 });
-
-// //     it("should get blob data", async () => {
-// //         const response = await request(server).get("/items/download");
-// //         expect(response.status).toBe(200);
-// //         expect(response.body).not.toBeNull();
-// //         expect(response.body).toBeInstanceOf(Buffer);
-// //     });

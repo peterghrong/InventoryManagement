@@ -1,4 +1,4 @@
-import { Product, Warehouse } from "@prisma/client";
+import { Prisma, Warehouse } from "@prisma/client";
 import { prisma } from "../server";
 
 export default class WarehouseService {
@@ -15,7 +15,7 @@ export default class WarehouseService {
         return warehouse;
     }
 
-    static async create(name: string, address: string) {
+    static async createWarehouse(name: string, address: string) {
         const warehouse: Warehouse = await prisma.warehouse.create({
             data: {
                 name: name,
@@ -25,7 +25,7 @@ export default class WarehouseService {
         return warehouse;
     }
 
-    static async update(id: number, name: string, address: string) {
+    static async updateWarehouse(id: number, name: string, address: string) {
         const warehouse: Warehouse = await prisma.warehouse.update({
             where: { id: id },
             data: {
@@ -36,9 +36,19 @@ export default class WarehouseService {
         return warehouse;
     }
 
-    static async getProductsInWarehouse(warehouse_id: number) {
+    static async deleteWarehouse(id: number) {
+        await prisma.productInWarehouse.deleteMany({
+            where: { warehouseId: id },
+        });
+        const warehouse: Warehouse = await prisma.warehouse.delete({
+            where: { id: id },
+        });
+        return warehouse;
+    }
+
+    static async getProductsInWarehouse(warehouseId: number) {
         const productInWarehouse = await prisma.productInWarehouse.findMany({
-            where: { warehouseId: warehouse_id },
+            where: { warehouseId: warehouseId },
             select: {
                 inStockQuantity: true,
                 backOrderQuantity: true,
@@ -48,45 +58,50 @@ export default class WarehouseService {
         return productInWarehouse;
     }
 
-    static async orderProduct(
-        product_id: number,
-        warehouse_id: number,
-        quantity: number
-    ) {
+    static async checkOrCreate(productId: number, warehouseId: number) {
         const productInWarehouse = await prisma.productInWarehouse.findUnique({
             where: {
                 productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
+                    productId: productId,
+                    warehouseId: warehouseId,
                 },
             },
         });
         if (productInWarehouse == null) {
-            await prisma.productInWarehouse.create({
+            const createdProduct = await prisma.productInWarehouse.create({
                 data: {
                     product: {
                         connect: {
-                            id: product_id,
+                            id: productId,
                         },
                     },
                     warehouse: {
                         connect: {
-                            id: warehouse_id,
+                            id: warehouseId,
                         },
                     },
                 },
             });
+            return createdProduct;
         }
-        const backOrderQuantity: number =
-            productInWarehouse == null
-                ? 0
-                : productInWarehouse.backOrderQuantity;
+        return productInWarehouse;
+    }
 
+    static async orderProduct(
+        productId: number,
+        warehouseId: number,
+        quantity: number
+    ) {
+        const productInWarehouse = await WarehouseService.checkOrCreate(
+            productId,
+            warehouseId
+        );
+        const backOrderQuantity: number = productInWarehouse.backOrderQuantity;
         const orderedProduct = await prisma.productInWarehouse.update({
             where: {
                 productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
+                    productId: productId,
+                    warehouseId: warehouseId,
                 },
             },
             data: {
@@ -97,46 +112,22 @@ export default class WarehouseService {
     }
 
     static async stockProducts(
-        product_id: number,
-        warehouse_id: number,
+        productId: number,
+        warehouseId: number,
         quantity: number
     ) {
-        const productInWarehouse = await prisma.productInWarehouse.findUnique({
-            where: {
-                productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
-                },
-            },
-        });
-        if (productInWarehouse == null) {
-            await prisma.productInWarehouse.create({
-                data: {
-                    product: {
-                        connect: {
-                            id: product_id,
-                        },
-                    },
-                    warehouse: {
-                        connect: {
-                            id: warehouse_id,
-                        },
-                    },
-                },
-            });
-        }
-        const inStockQuantity: number =
-            productInWarehouse == null ? 0 : productInWarehouse.inStockQuantity;
-        const backOrderQuantity: number =
-            productInWarehouse == null
-                ? 0
-                : productInWarehouse.backOrderQuantity;
+        const productInWarehouse = await WarehouseService.checkOrCreate(
+            productId,
+            warehouseId
+        );
+        const inStockQuantity: number = productInWarehouse.inStockQuantity;
+        const backOrderQuantity: number = productInWarehouse.backOrderQuantity;
 
         const stockedProduct = await prisma.productInWarehouse.update({
             where: {
                 productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
+                    productId: productId,
+                    warehouseId: warehouseId,
                 },
             },
             data: {
@@ -151,33 +142,24 @@ export default class WarehouseService {
     }
 
     static async fulfillOrder(
-        product_id: number,
-        warehouse_id: number,
+        productId: number,
+        warehouseId: number,
         quantity: number
     ) {
         const productInWarehouse = await prisma.productInWarehouse.findUnique({
             where: {
                 productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
+                    productId: productId,
+                    warehouseId: warehouseId,
                 },
             },
         });
         if (productInWarehouse == null) {
-            await prisma.productInWarehouse.create({
-                data: {
-                    product: {
-                        connect: {
-                            id: product_id,
-                        },
-                    },
-                    warehouse: {
-                        connect: {
-                            id: warehouse_id,
-                        },
-                    },
-                },
-            });
+            throw new Prisma.PrismaClientKnownRequestError(
+                "Not found",
+                "P2025",
+                ""
+            );
         }
         const inStockQuantity: number =
             productInWarehouse == null ? 0 : productInWarehouse.inStockQuantity;
@@ -188,8 +170,8 @@ export default class WarehouseService {
         const fulfilledProduct = await prisma.productInWarehouse.update({
             where: {
                 productId_warehouseId: {
-                    productId: product_id,
-                    warehouseId: warehouse_id,
+                    productId: productId,
+                    warehouseId: warehouseId,
                 },
             },
             data: {

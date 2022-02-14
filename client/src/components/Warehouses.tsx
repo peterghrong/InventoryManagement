@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Col, Container, Row, Table } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { getProducts, getWarehouses } from "../api/api";
+import { getWarehouses } from "../api/api";
 import Warehouse from "./Warehouse";
 
 const Warehouses = () => {
@@ -55,7 +55,7 @@ const Warehouses = () => {
                 </Col>
                 <Col sm={3}>
                     <Button variant="primary" size="lg" onClick={routeChange}>
-                        Add warehouse
+                        Add Warehouse
                     </Button>
                 </Col>
             </Row>

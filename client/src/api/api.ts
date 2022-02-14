@@ -200,6 +200,19 @@ export const deleteProduct = async (
     }
 };
 
+export const deleteWarehouse = async (
+    id: string
+): Promise<AxiosResponse<ApiDataType>> => {
+    try {
+        const deletedWarehouse: AxiosResponse<ApiDataType> = await axios.delete(
+            `${warehouseUrl}/${id}`
+        );
+        return deletedWarehouse;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const downloadCSV = async (): Promise<void> => {
     try {
         const blobData = await axios.get(

@@ -1,5 +1,5 @@
 import { Button, Form } from "react-bootstrap";
-import { addProduct, addWarehouse } from "../api/api";
+import { addWarehouse } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 const AddProduct = () => {
@@ -12,7 +12,7 @@ const AddProduct = () => {
     };
 
     const submitProduct = async () => {
-        addWarehouse(warehouse).then(() => navigate("/"));
+        addWarehouse(warehouse).then(() => navigate("/warehouse"));
     };
 
     return (
@@ -40,16 +40,6 @@ const AddProduct = () => {
                         }}
                     />
                 </Form.Group>
-                {/* <Form.Group className="mb-3" controlId="new_count">
-                    <Form.Label>Inventory Quantity</Form.Label>
-                    <Form.Control
-                        type="number"
-                        defaultValue={item.count}
-                        onChange={(event) => {
-                            item.count = parseInt(event.target.value);
-                        }}
-                    />
-                </Form.Group> */}
             </Form>
             <Button variant="primary" onClick={submitProduct}>
                 Add Warehouse

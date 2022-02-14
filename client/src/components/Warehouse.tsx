@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, ButtonGroup, Form, Modal, Table } from "react-bootstrap";
 import {
-    deleteProduct,
+    deleteWarehouse,
     getProducts,
     getWarehouseDetail,
     stockWarehouse,
@@ -62,12 +62,12 @@ const Warehouse = ({ id, name, address }: WarehouseProps) => {
             });
     };
 
-    const putProduct = async () => {
+    const putWarehouse = async () => {
         updateWarehouse(warehouse).then(() => window.location.reload());
     };
 
-    const removeProduct = async () => {
-        deleteProduct(id).then(() => window.location.reload());
+    const removeWarehouse = async () => {
+        deleteWarehouse(id).then(() => window.location.reload());
     };
 
     const warehouse: IWarehouse = {
@@ -93,7 +93,7 @@ const Warehouse = ({ id, name, address }: WarehouseProps) => {
                         <Button variant="primary" onClick={handleShow}>
                             Edit
                         </Button>
-                        <Button variant="danger" onClick={removeProduct}>
+                        <Button variant="danger" onClick={removeWarehouse}>
                             Delete
                         </Button>
                     </ButtonGroup>
@@ -107,7 +107,7 @@ const Warehouse = ({ id, name, address }: WarehouseProps) => {
                 keyboard={false}
             >
                 <Modal.Header closeButton>
-                    <Modal.Title>Modal title</Modal.Title>
+                    <Modal.Title>Update Warehouse Information</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -125,7 +125,7 @@ const Warehouse = ({ id, name, address }: WarehouseProps) => {
                             className="mb-3"
                             controlId={`address_${address}`}
                         >
-                            <Form.Label>Description</Form.Label>
+                            <Form.Label>Address</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -138,7 +138,7 @@ const Warehouse = ({ id, name, address }: WarehouseProps) => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={putProduct}>
+                    <Button variant="primary" onClick={putWarehouse}>
                         Update
                     </Button>
                     <Button variant="secondary" onClick={handleClose}>
