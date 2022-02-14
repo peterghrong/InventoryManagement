@@ -32,7 +32,6 @@
     "scripts": {
         "migrate": "prisma db push",
         "dev": "nodemon src/server.ts",
-        "test": "jest --runInBand",
-        "test-report": "jest --collect-coverage"
+        "test": "jest --runInBand"
     }
 }
